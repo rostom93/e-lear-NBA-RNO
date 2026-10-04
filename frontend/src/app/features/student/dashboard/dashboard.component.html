@@ -1,0 +1,45 @@
+<section class="dash" aria-labelledby="student-dash-title">
+  <header class="dash__header">
+    <div>
+      <h1 id="student-dash-title">{{ 'dashboard.student.title' | translate }}</h1>
+      <p>{{ 'dashboard.student.body' | translate }}</p>
+    </div>
+    <div class="dash__actions">
+      <a class="btn btn--primary" routerLink="/courses">{{ 'nav.courses' | translate }}</a>
+      <a class="btn btn--ghost" routerLink="/student/credits">{{ 'credits.buy' | translate }}</a>
+    </div>
+  </header>
+
+  <p class="balance">
+    {{ 'credits.balance' | translate }}: <strong>{{ auth.creditBalance() }}</strong>
+  </p>
+
+  @if (error()) {
+    <p class="alert" role="alert">{{ 'courses.error.load' | translate }}</p>
+  }
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else if (enrollments().length === 0) {
+    <p>{{ 'dashboard.student.empty' | translate }}</p>
+  } @else {
+    <ul class="list">
+      @for (item of enrollments(); track item.id) {
+        <li>
+          <article>
+            <div>
+              <h2>{{ item.course.title }}</h2>
+              <p>{{ 'courses.progress' | translate }}: {{ item.progress_percent }}%</p>
+              <div class="bar" role="progressbar" [attr.aria-valuenow]="item.progress_percent" aria-valuemin="0" aria-valuemax="100">
+                <span [style.width.%]="item.progress_percent"></span>
+              </div>
+            </div>
+            <a class="btn btn--primary" [routerLink]="['/student/learn', item.id]">
+              {{ 'courses.continue' | translate }}
+            </a>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+</section>

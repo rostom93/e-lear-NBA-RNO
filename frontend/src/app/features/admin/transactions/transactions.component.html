@@ -1,0 +1,58 @@
+<section class="tx" aria-labelledby="tx-title">
+  <header class="tx__header">
+    <div>
+      <h1 id="tx-title">{{ 'admin.tx.title' | translate }}</h1>
+      <a routerLink="/admin">{{ 'admin.back' | translate }}</a>
+    </div>
+    <nav class="admin__nav" aria-label="Admin">
+      <a routerLink="/admin">{{ 'admin.nav.kpis' | translate }}</a>
+      <a routerLink="/admin/users">{{ 'admin.nav.users' | translate }}</a>
+      <a routerLink="/admin/moderation">{{ 'admin.nav.moderation' | translate }}</a>
+      <a routerLink="/admin/transactions" class="is-active">{{ 'admin.nav.transactions' | translate }}</a>
+    </nav>
+  </header>
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else if (error()) {
+    <p class="alert" role="alert">{{ 'admin.error.load' | translate }}</p>
+  } @else if (transactions().length === 0) {
+    <p>{{ 'admin.tx.empty' | translate }}</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'admin.tx.date' | translate }}</th>
+            <th>{{ 'admin.tx.user' | translate }}</th>
+            <th>{{ 'admin.tx.pack' | translate }}</th>
+            <th>{{ 'nav.credits' | translate }}</th>
+            <th>{{ 'admin.tx.amount' | translate }}</th>
+            <th>{{ 'admin.tx.status' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tx of transactions(); track tx.id) {
+            <tr>
+              <td>{{ formatDate(tx.created_at) }}</td>
+              <td>{{ tx.user_email }}</td>
+              <td>{{ tx.pack_name || '—' }}</td>
+              <td>{{ tx.credits }}</td>
+              <td>{{ tx.amount_euros }} €</td>
+              <td>
+                <span
+                  class="status"
+                  [class.status--success]="tx.status === 'SUCCESS'"
+                  [class.status--failed]="tx.status === 'FAILED'"
+                  [class.status--pending]="tx.status === 'PENDING'"
+                >
+                  {{ tx.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

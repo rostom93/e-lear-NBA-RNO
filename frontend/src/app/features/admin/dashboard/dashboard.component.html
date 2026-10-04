@@ -1,0 +1,76 @@
+<section class="admin" aria-labelledby="admin-dash-title">
+  <header class="admin__header">
+    <div>
+      <h1 id="admin-dash-title">{{ 'dashboard.admin.title' | translate }}</h1>
+      <p>{{ 'dashboard.admin.body' | translate }}</p>
+    </div>
+    <nav class="admin__nav" aria-label="Admin">
+      <a routerLink="/admin" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+        {{ 'admin.nav.kpis' | translate }}
+      </a>
+      <a routerLink="/admin/users" routerLinkActive="is-active">{{ 'admin.nav.users' | translate }}</a>
+      <a routerLink="/admin/moderation" routerLinkActive="is-active">
+        {{ 'admin.nav.moderation' | translate }}
+      </a>
+      <a routerLink="/admin/transactions" routerLinkActive="is-active">
+        {{ 'admin.nav.transactions' | translate }}
+      </a>
+    </nav>
+  </header>
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else if (error()) {
+    <p class="alert" role="alert">{{ 'admin.error.load' | translate }}</p>
+  } @else if (stats(); as s) {
+    <div class="kpis" role="list">
+      <article role="listitem">
+        <h2>{{ 'admin.kpi.users' | translate }}</h2>
+        <p class="kpis__value">{{ s.users.total }}</p>
+      </article>
+      <article role="listitem">
+        <h2>{{ 'admin.kpi.students' | translate }}</h2>
+        <p class="kpis__value">{{ s.users.students }}</p>
+      </article>
+      <article role="listitem">
+        <h2>{{ 'admin.kpi.teachers' | translate }}</h2>
+        <p class="kpis__value">{{ s.users.teachers }}</p>
+      </article>
+      <article role="listitem">
+        <h2>{{ 'admin.kpi.revenue' | translate }}</h2>
+        <p class="kpis__value">{{ s.payments.revenue_euros }} €</p>
+      </article>
+      <article role="listitem">
+        <h2>{{ 'admin.kpi.creditsSold' | translate }}</h2>
+        <p class="kpis__value">{{ s.payments.credits_sold }}</p>
+      </article>
+      <article role="listitem">
+        <h2>{{ 'admin.kpi.successTx' | translate }}</h2>
+        <p class="kpis__value">{{ s.payments.successful_transactions }}</p>
+      </article>
+      <article role="listitem">
+        <h2>{{ 'admin.kpi.avgCompletion' | translate }}</h2>
+        <p class="kpis__value">{{ s.average_completion_percent }}%</p>
+      </article>
+    </div>
+
+    <section class="popular" aria-labelledby="popular-title">
+      <h2 id="popular-title">{{ 'admin.kpi.popular' | translate }}</h2>
+      @if (s.popular_courses.length === 0) {
+        <p>{{ 'admin.kpi.emptyPopular' | translate }}</p>
+      } @else {
+        <ol>
+          @for (course of s.popular_courses; track course.id) {
+            <li>
+              <span>{{ course.title }}</span>
+              <span>
+                {{ course.enroll_count }}
+                {{ 'admin.kpi.enrollments' | translate }}
+              </span>
+            </li>
+          }
+        </ol>
+      }
+    </section>
+  }
+</section>

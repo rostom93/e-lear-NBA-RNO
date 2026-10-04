@@ -1,0 +1,68 @@
+<section class="credits" aria-labelledby="credits-title">
+  <header>
+    <h1 id="credits-title">{{ 'credits.title' | translate }}</h1>
+    <p>
+      {{ 'credits.balance' | translate }}:
+      <strong>{{ auth.creditBalance() }}</strong>
+    </p>
+  </header>
+
+  @if (message() === 'success') {
+    <p class="ok" role="status">{{ 'credits.success' | translate }}</p>
+  }
+  @if (message() === 'error') {
+    <p class="alert" role="alert">{{ 'credits.error' | translate }}</p>
+  }
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else {
+    <ul class="packs">
+      @for (pack of packs(); track pack.id) {
+        <li>
+          <article>
+            <h2>{{ pack.name }}</h2>
+            <p>{{ pack.credits }} {{ 'nav.credits' | translate }}</p>
+            <p class="price">{{ pack.price_euros }} €</p>
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="purchasingId() === pack.id"
+              (click)="buy(pack.id)"
+            >
+              {{ 'credits.buy' | translate }}
+            </button>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+
+  <section class="history" aria-labelledby="history-title">
+    <h2 id="history-title">{{ 'credits.history' | translate }}</h2>
+    @if (transactions().length === 0) {
+      <p>{{ 'credits.historyEmpty' | translate }}</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'credits.col.pack' | translate }}</th>
+            <th>{{ 'nav.credits' | translate }}</th>
+            <th>{{ 'credits.col.amount' | translate }}</th>
+            <th>{{ 'credits.col.status' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tx of transactions(); track tx.id) {
+            <tr>
+              <td>{{ tx.pack_name || '—' }}</td>
+              <td>{{ tx.credits }}</td>
+              <td>{{ tx.amount_euros }} €</td>
+              <td>{{ tx.status }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</section>

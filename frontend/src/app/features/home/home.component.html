@@ -1,0 +1,40 @@
+<section class="hero" aria-labelledby="home-title">
+  <p class="hero__brand">{{ 'app.name' | translate }}</p>
+  <h1 id="home-title">{{ 'home.welcome' | translate }}</h1>
+  <p class="hero__text">{{ 'app.tagline' | translate }}</p>
+
+  <div class="hero__actions">
+    <a class="btn btn--primary" routerLink="/courses">{{ 'home.explore' | translate }}</a>
+    @if (auth.isAuthenticated()) {
+      <a class="btn btn--ghost" [routerLink]="auth.dashboardRouteForRole()">
+        {{ 'nav.dashboard' | translate }}
+      </a>
+    } @else {
+      <a class="btn btn--ghost" routerLink="/auth/login">{{ 'home.cta' | translate }}</a>
+    }
+  </div>
+</section>
+
+<section class="featured" aria-labelledby="featured-title">
+  <div class="featured__head">
+    <h2 id="featured-title">{{ 'nav.courses' | translate }}</h2>
+    <a routerLink="/courses">{{ 'home.explore' | translate }}</a>
+  </div>
+
+  @if (loadError()) {
+    <p class="alert" role="alert">{{ 'courses.error.load' | translate }}</p>
+  } @else if (featured().length === 0) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else {
+    <ul>
+      @for (course of featured(); track course.id) {
+        <li>
+          <a [routerLink]="['/courses', course.id]">
+            <strong>{{ course.title }}</strong>
+            <span>{{ course.price_credits }} {{ 'nav.credits' | translate }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</section>

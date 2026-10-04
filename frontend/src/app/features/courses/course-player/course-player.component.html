@@ -1,0 +1,151 @@
+@if (loading()) {
+  <p>{{ 'courses.loading' | translate }}</p>
+} @else if (error() || !course() || !enrollment()) {
+  <p class="alert" role="alert">{{ 'courses.error.load' | translate }}</p>
+} @else {
+  <section class="player" aria-labelledby="player-title">
+    <header class="player__header">
+      <div>
+        <p class="eyebrow">{{ 'courses.player' | translate }}</p>
+        <h1 id="player-title">{{ course()!.title }}</h1>
+      </div>
+      <a class="btn btn--ghost" routerLink="/student">{{ 'nav.dashboard' | translate }}</a>
+    </header>
+
+    <div class="progress" role="status" aria-live="polite">
+      <div class="progress__label">
+        <span>{{ 'courses.progress' | translate }}</span>
+        <strong>{{ progress() }}%</strong>
+      </div>
+      <div
+        class="progress__bar"
+        role="progressbar"
+        [attr.aria-valuenow]="progress()"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <span [style.width.%]="progress()"></span>
+      </div>
+    </div>
+
+    <div class="player__layout">
+      <aside class="toc" [attr.aria-label]="'courses.modules' | translate">
+        <h2>{{ 'courses.modules' | translate }}</h2>
+        <ol>
+          @for (module of modules(); track module.id) {
+            <li>
+              <button
+                type="button"
+                [class.active]="module.id === activeModuleId()"
+                (click)="selectModule(module)"
+              >
+                <span>{{ module.order }}. {{ module.title }}</span>
+                <small>{{ module.module_type }}</small>
+              </button>
+            </li>
+          }
+        </ol>
+      </aside>
+
+      <div class="content">
+        @if (activeModule(); as module) {
+          <h2>{{ module.title }}</h2>
+
+          @switch (module.module_type) {
+            @case ('PDF') {
+              <p>{{ 'courses.pdf.hint' | translate }}</p>
+              <a class="btn btn--primary" [href]="module.pdf_url" target="_blank" rel="noopener">
+                {{ 'courses.pdf.open' | translate }}
+              </a>
+              <button
+                type="button"
+                class="btn btn--ghost"
+                [disabled]="completing()"
+                (click)="completeCurrent()"
+              >
+                {{ 'courses.markDone' | translate }}
+              </button>
+            }
+            @case ('VIDEO') {
+              @if (embedUrl(); as url) {
+                <div class="video">
+                  <iframe
+                    [src]="url"
+                    title="{{ module.title }}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"
+                  ></iframe>
+                </div>
+              } @else {
+                <a [href]="module.video_url" target="_blank" rel="noopener">{{ module.video_url }}</a>
+              }
+
+              @if (module.captions_url) {
+                <p>
+                  <a [href]="module.captions_url" target="_blank" rel="noopener">
+                    {{ 'courses.captions' | translate }}
+                  </a>
+                </p>
+              }
+
+              @if (module.transcript) {
+                <details>
+                  <summary>{{ 'courses.transcript' | translate }}</summary>
+                  <p>{{ module.transcript }}</p>
+                </details>
+              }
+
+              <button
+                type="button"
+                class="btn btn--primary"
+                [disabled]="completing()"
+                (click)="completeCurrent()"
+              >
+                {{ 'courses.markDone' | translate }}
+              </button>
+            }
+            @case ('QUIZ') {
+              @if (module.quiz; as quiz) {
+                <form [formGroup]="quizForm" (ngSubmit)="submitQuiz()">
+                  @for (question of quiz.questions; track question.id) {
+                    <fieldset>
+                      <legend>{{ question.order }}. {{ question.text }}</legend>
+                      @for (choice of question.choices; track choice.id) {
+                        <label class="choice">
+                          <input
+                            type="radio"
+                            [formControlName]="controlName(question.id)"
+                            [value]="choice.id"
+                          />
+                          <span>{{ choice.text }}</span>
+                        </label>
+                      }
+                    </fieldset>
+                  }
+
+                  <button class="btn btn--primary" type="submit" [disabled]="completing()">
+                    {{ 'courses.quiz.submit' | translate }}
+                  </button>
+                </form>
+
+                @if (quizResult(); as result) {
+                  <div class="quiz-result" role="status">
+                    <p>
+                      {{ 'courses.quiz.score' | translate }}: {{ result.score }}% —
+                      @if (result.passed) {
+                        {{ 'courses.quiz.passed' | translate }}
+                      } @else {
+                        {{ 'courses.quiz.failed' | translate }}
+                      }
+                    </p>
+                  </div>
+                }
+              }
+            }
+          }
+        }
+      </div>
+    </div>
+  </section>
+}

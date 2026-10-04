@@ -1,0 +1,89 @@
+<section class="catalog" aria-labelledby="catalog-title">
+  <header class="catalog__header">
+    <h1 id="catalog-title">{{ 'courses.catalog.title' | translate }}</h1>
+    <p>{{ 'courses.catalog.subtitle' | translate }}</p>
+  </header>
+
+  <form class="filters" [formGroup]="filters" (ngSubmit)="reload()">
+    <label>
+      <span>{{ 'courses.filter.tag' | translate }}</span>
+      <select formControlName="tags">
+        <option value="">{{ 'courses.filter.all' | translate }}</option>
+        @for (tag of tags(); track tag.id) {
+          <option [value]="tag.slug">{{ tag.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>{{ 'courses.filter.category' | translate }}</span>
+      <input formControlName="category" [placeholder]="'courses.filter.categoryPh' | translate" />
+    </label>
+
+    <label>
+      <span>{{ 'courses.filter.level' | translate }}</span>
+      <select formControlName="level">
+        <option value="">{{ 'courses.filter.all' | translate }}</option>
+        <option value="BEGINNER">{{ 'courses.level.beginner' | translate }}</option>
+        <option value="INTERMEDIATE">{{ 'courses.level.intermediate' | translate }}</option>
+        <option value="ADVANCED">{{ 'courses.level.advanced' | translate }}</option>
+      </select>
+    </label>
+
+    <label>
+      <span>{{ 'courses.filter.content' | translate }}</span>
+      <select formControlName="content_focus">
+        <option value="">{{ 'courses.filter.all' | translate }}</option>
+        <option value="MIXED">MIXED</option>
+        <option value="VIDEO">VIDEO</option>
+        <option value="PDF">PDF</option>
+        <option value="QUIZ">QUIZ</option>
+      </select>
+    </label>
+
+    <div class="filters__actions">
+      <button type="submit" class="btn btn--primary">{{ 'courses.filter.apply' | translate }}</button>
+      <button type="button" class="btn btn--ghost" (click)="reset()">
+        {{ 'courses.filter.reset' | translate }}
+      </button>
+    </div>
+  </form>
+
+  @if (error()) {
+    <p class="alert" role="alert">{{ 'courses.error.load' | translate }}</p>
+  }
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else if (courses().length === 0) {
+    <p>{{ 'courses.empty' | translate }}</p>
+  } @else {
+    <ul class="grid">
+      @for (course of courses(); track course.id) {
+        <li>
+          <article class="course">
+            <div class="course__meta">
+              <span>{{ course.level }}</span>
+              <span>{{ course.category }}</span>
+            </div>
+            <h2>
+              <a [routerLink]="['/courses', course.id]">{{ course.title }}</a>
+            </h2>
+            <p>{{ course.description }}</p>
+            <div class="course__tags">
+              @for (tag of course.tags; track tag.id) {
+                <span>{{ tag.name }}</span>
+              }
+            </div>
+            <footer>
+              <strong>{{ course.price_credits }} {{ 'nav.credits' | translate }}</strong>
+              <a class="btn btn--ghost" [routerLink]="['/courses', course.id]">
+                {{ 'courses.view' | translate }}
+              </a>
+            </footer>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+</section>

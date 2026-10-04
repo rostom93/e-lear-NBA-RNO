@@ -1,0 +1,70 @@
+@if (loading()) {
+  <p>{{ 'courses.loading' | translate }}</p>
+} @else if (!course()) {
+  <p class="alert" role="alert">{{ 'courses.error.load' | translate }}</p>
+} @else {
+  <article class="detail" aria-labelledby="course-title">
+    <header>
+      <p class="detail__eyebrow">{{ course()!.category }} · {{ course()!.level }}</p>
+      <h1 id="course-title">{{ course()!.title }}</h1>
+      <p class="detail__desc">{{ course()!.description }}</p>
+      <div class="detail__tags">
+        @for (tag of course()!.tags; track tag.id) {
+          <span>{{ tag.name }}</span>
+        }
+      </div>
+    </header>
+
+    <section class="detail__aside" aria-label="actions">
+      <p class="price">
+        <strong>{{ course()!.price_credits }}</strong>
+        {{ 'nav.credits' | translate }}
+      </p>
+
+      @if (enrollment(); as enrolled) {
+        <p class="progress">
+          {{ 'courses.progress' | translate }}: {{ enrolled.progress_percent }}%
+        </p>
+        <a class="btn btn--primary" [routerLink]="['/student/learn', enrolled.id]">
+          {{ 'courses.continue' | translate }}
+        </a>
+      } @else if (canEnroll()) {
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="enrolling()"
+          (click)="enroll()"
+        >
+          {{ 'courses.enroll' | translate }}
+        </button>
+      } @else if (!auth.isAuthenticated()) {
+        <a class="btn btn--primary" routerLink="/auth/login">{{ 'nav.login' | translate }}</a>
+      }
+
+      @if (error() === 'credits') {
+        <p class="alert" role="alert">
+          {{ 'courses.error.credits' | translate }}
+          <a routerLink="/student/credits">{{ 'credits.buy' | translate }}</a>
+        </p>
+      }
+      @if (error() === 'already') {
+        <p class="alert" role="alert">{{ 'courses.error.already' | translate }}</p>
+      }
+      @if (error() === 'enroll' || error() === 'load') {
+        <p class="alert" role="alert">{{ 'courses.error.enroll' | translate }}</p>
+      }
+    </section>
+
+    <section class="modules" aria-labelledby="modules-title">
+      <h2 id="modules-title">{{ 'courses.modules' | translate }}</h2>
+      <ol>
+        @for (module of course()!.modules ?? []; track module.id) {
+          <li>
+            <strong>{{ module.title }}</strong>
+            <span>{{ module.module_type }}</span>
+          </li>
+        }
+      </ol>
+    </section>
+  </article>
+}

@@ -1,0 +1,32 @@
+# --- Python / Django ---
+backend/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Base de donnees locale : regeneree via `manage.py migrate && manage.py seed_data`
+*.sqlite3
+*.sqlite3-journal
+
+# Secrets : seul .env.example est versionne
+.env
+.env.local
+
+# --- Node / Angular ---
+node_modules/
+frontend/dist/
+frontend/.angular/cache/
+npm-debug.log*
+
+# --- Logs des serveurs de dev (voir start.ps1) ---
+*.log
+
+# --- Editeurs / OS ---
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+desktop.ini

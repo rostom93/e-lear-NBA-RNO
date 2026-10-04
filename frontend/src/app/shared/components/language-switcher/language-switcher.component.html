@@ -1,0 +1,14 @@
+<div class="lang" role="group" [attr.aria-label]="'lang.label' | translate">
+  @for (lang of languages; track lang) {
+    <button
+      type="button"
+      class="lang__btn"
+      [class.lang__btn--active]="i18n.lang() === lang"
+      [attr.aria-pressed]="i18n.lang() === lang"
+      [attr.aria-label]="('lang.label' | translate) + ' ' + (lang | uppercase)"
+      (click)="select(lang)"
+    >
+      {{ lang | uppercase }}
+    </button>
+  }
+</div>

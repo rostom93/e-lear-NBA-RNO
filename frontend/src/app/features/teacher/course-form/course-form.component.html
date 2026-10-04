@@ -1,0 +1,203 @@
+<section class="form-page" aria-labelledby="form-title">
+  <header>
+    <h1 id="form-title">
+      @if (courseId()) {
+        {{ 'teacher.edit' | translate }}
+      } @else {
+        {{ 'teacher.create' | translate }}
+      }
+    </h1>
+    <div class="header-actions">
+      @if (courseId(); as id) {
+        <a [routerLink]="['/teacher/courses', id, 'preview']" class="btn btn--ghost">
+          {{ 'teacher.preview' | translate }}
+        </a>
+      }
+      <a routerLink="/teacher" class="btn btn--ghost">{{ 'teacher.cancel' | translate }}</a>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else {
+    @if (error()) {
+      <p class="alert" role="alert">
+        @if (errorDetail() === 'teacher.error.validation') {
+          {{ 'teacher.error.validation' | translate }}
+        } @else {
+          {{ 'teacher.error.save' | translate }}
+          @if (errorDetail()) {
+            <span class="alert__detail">{{ errorDetail() }}</span>
+          }
+        }
+      </p>
+    }
+    @if (success()) {
+      <p class="ok" role="status">{{ 'teacher.saved' | translate }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="grid">
+        <label>
+          <span>{{ 'teacher.form.title' | translate }}</span>
+          <input formControlName="title" />
+          @if (showError(form.controls.title)) {
+            <small class="field-error">{{ 'auth.required' | translate }}</small>
+          }
+        </label>
+        <label>
+          <span>{{ 'teacher.form.price' | translate }}</span>
+          <input type="number" formControlName="price_credits" min="0" />
+        </label>
+        <label>
+          <span>{{ 'teacher.form.level' | translate }}</span>
+          <select formControlName="level">
+            <option value="BEGINNER">{{ 'courses.level.beginner' | translate }}</option>
+            <option value="INTERMEDIATE">{{ 'courses.level.intermediate' | translate }}</option>
+            <option value="ADVANCED">{{ 'courses.level.advanced' | translate }}</option>
+          </select>
+        </label>
+        <label>
+          <span>{{ 'teacher.form.category' | translate }}</span>
+          <input formControlName="category" />
+          @if (showError(form.controls.category)) {
+            <small class="field-error">{{ 'auth.required' | translate }}</small>
+          }
+        </label>
+        <label>
+          <span>{{ 'teacher.form.content' | translate }}</span>
+          <select formControlName="content_focus">
+            <option value="MIXED">MIXED</option>
+            <option value="VIDEO">VIDEO</option>
+            <option value="PDF">PDF</option>
+            <option value="QUIZ">QUIZ</option>
+          </select>
+        </label>
+        <label class="check">
+          <input type="checkbox" formControlName="is_active" />
+          <span>{{ 'teacher.form.active' | translate }}</span>
+        </label>
+      </div>
+
+      <label class="full">
+        <span>{{ 'teacher.form.description' | translate }}</span>
+        <textarea rows="4" formControlName="description"></textarea>
+        @if (showError(form.controls.description)) {
+          <small class="field-error">{{ 'auth.required' | translate }}</small>
+        }
+      </label>
+
+      <fieldset>
+        <legend>{{ 'teacher.form.tags' | translate }}</legend>
+        <div class="tags">
+          @for (tag of tags(); track tag.id) {
+            <label>
+              <input
+                type="checkbox"
+                [checked]="isTagSelected(tag.id)"
+                (change)="toggleTag(tag.id, $any($event.target).checked)"
+              />
+              {{ tag.name }}
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <section formArrayName="modules" class="modules">
+        <div class="modules__head">
+          <h2>{{ 'teacher.form.modules' | translate }}</h2>
+          <button type="button" class="btn btn--ghost" (click)="addModule()">
+            {{ 'teacher.form.addModule' | translate }}
+          </button>
+        </div>
+
+        @for (module of modules.controls; track $index; let i = $index) {
+          <article [formGroupName]="i" class="module">
+            <div class="module__top">
+              <strong>#{{ i + 1 }}</strong>
+              <button type="button" class="btn btn--ghost" (click)="removeModule(i)">
+                {{ 'teacher.form.removeModule' | translate }}
+              </button>
+            </div>
+
+            <div class="grid">
+              <label>
+                <span>{{ 'teacher.form.moduleTitle' | translate }}</span>
+                <input formControlName="title" />
+              </label>
+              <label>
+                <span>{{ 'teacher.form.moduleType' | translate }}</span>
+                <select formControlName="module_type">
+                  <option value="PDF">PDF</option>
+                  <option value="VIDEO">VIDEO</option>
+                  <option value="QUIZ">QUIZ</option>
+                </select>
+              </label>
+            </div>
+
+            @switch (module.get('module_type')?.value) {
+              @case ('PDF') {
+                <label class="full">
+                  <span>{{ 'teacher.form.pdfUrl' | translate }}</span>
+                  <input formControlName="pdf_url" />
+                </label>
+              }
+              @case ('VIDEO') {
+                <div class="grid">
+                  <label>
+                    <span>{{ 'teacher.form.videoUrl' | translate }}</span>
+                    <input formControlName="video_url" />
+                  </label>
+                  <label>
+                    <span>{{ 'teacher.form.videoProvider' | translate }}</span>
+                    <select formControlName="video_provider">
+                      <option value="YOUTUBE">YouTube</option>
+                      <option value="VIMEO">Vimeo</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>{{ 'teacher.form.captions' | translate }}</span>
+                    <input formControlName="captions_url" />
+                  </label>
+                </div>
+                <label class="full">
+                  <span>{{ 'teacher.form.transcript' | translate }}</span>
+                  <textarea rows="3" formControlName="transcript"></textarea>
+                </label>
+              }
+              @case ('QUIZ') {
+                @if (module.get('existing_quiz_id')?.value) {
+                  <p class="hint">Quiz #{{ module.get('existing_quiz_id')?.value }}</p>
+                } @else {
+                  <div class="grid">
+                    <label>
+                      <span>{{ 'teacher.form.quizTitle' | translate }}</span>
+                      <input formControlName="quiz_title" />
+                    </label>
+                    <label>
+                      <span>{{ 'teacher.form.quizQuestion' | translate }}</span>
+                      <input formControlName="quiz_question" />
+                    </label>
+                    <label>
+                      <span>{{ 'teacher.form.quizCorrect' | translate }}</span>
+                      <input formControlName="quiz_correct" />
+                    </label>
+                    <label>
+                      <span>{{ 'teacher.form.quizWrong' | translate }}</span>
+                      <input formControlName="quiz_wrong" />
+                    </label>
+                  </div>
+                }
+              }
+            }
+          </article>
+        }
+      </section>
+
+      <button class="btn btn--primary" type="submit" [disabled]="saving()">
+        {{ 'teacher.save' | translate }}
+      </button>
+    </form>
+  }
+</section>

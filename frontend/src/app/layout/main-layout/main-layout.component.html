@@ -1,0 +1,56 @@
+<a class="skip-link" href="#main-content">{{ 'nav.skip' | translate }}</a>
+
+<header class="topbar">
+  <div class="topbar__brand">
+    <a routerLink="/" class="brand">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__text">{{ 'app.name' | translate }}</span>
+    </a>
+    <p class="brand__tagline">{{ 'app.tagline' | translate }}</p>
+  </div>
+
+  <nav class="topbar__nav" [attr.aria-label]="'nav.home' | translate">
+    <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+      {{ 'nav.home' | translate }}
+    </a>
+    <a routerLink="/courses" routerLinkActive="is-active">{{ 'nav.courses' | translate }}</a>
+    @if (auth.isAuthenticated()) {
+      <a [routerLink]="dashboardLink()" routerLinkActive="is-active">
+        {{ 'nav.dashboard' | translate }}
+      </a>
+      @if (showCredits()) {
+        <a routerLink="/student/credits" routerLinkActive="is-active">
+          {{ 'credits.buy' | translate }}
+        </a>
+      }
+    }
+  </nav>
+
+  <div class="topbar__actions">
+    <app-language-switcher />
+    <app-theme-toggle />
+
+    @if (auth.isAuthenticated()) {
+      @if (showCredits()) {
+        <span class="credits" aria-live="polite">
+          {{ 'nav.credits' | translate }}: {{ auth.creditBalance() }}
+        </span>
+      }
+      <span class="user" [attr.title]="auth.currentUser()?.email">
+        {{ auth.currentUser()?.email }}
+      </span>
+      <button type="button" class="btn btn--ghost" (click)="auth.logout()">
+        {{ 'nav.logout' | translate }}
+      </button>
+    } @else {
+      <a routerLink="/auth/login" class="btn btn--ghost">{{ 'nav.login' | translate }}</a>
+      <a routerLink="/auth/register" class="btn btn--primary">{{ 'nav.register' | translate }}</a>
+    }
+  </div>
+</header>
+
+<main id="main-content" class="main" tabindex="-1">
+  <router-outlet />
+</main>
+
+<app-chatbot-widget />

@@ -1,0 +1,121 @@
+<section class="students" aria-labelledby="students-title">
+  <header>
+    <div>
+      <h1 id="students-title">{{ 'teacher.students.title' | translate }}</h1>
+      @if (course(); as c) {
+        <p>{{ c.title }}</p>
+      }
+    </div>
+    <div class="header-actions">
+      <a class="btn btn--ghost" routerLink="/teacher">{{ 'nav.dashboard' | translate }}</a>
+      @if (course(); as c) {
+        <a class="btn btn--ghost" [routerLink]="['/teacher/courses', c.id, 'edit']">
+          {{ 'teacher.edit' | translate }}
+        </a>
+      }
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else if (error()) {
+    <p class="alert" role="alert">{{ 'courses.error.load' | translate }}</p>
+  } @else if (students().length === 0) {
+    <p>{{ 'teacher.students.empty' | translate }}</p>
+  } @else {
+    <div class="layout">
+      <section aria-label="students-table">
+        <label class="select-all">
+          <input
+            type="checkbox"
+            [checked]="selectedIds().length === students().length"
+            (change)="selectAll($any($event.target).checked)"
+          />
+          {{ 'teacher.email.selectAll' | translate }}
+        </label>
+
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>{{ 'teacher.students.name' | translate }}</th>
+              <th>{{ 'teacher.students.progress' | translate }}</th>
+              <th>{{ 'teacher.students.quizzes' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of students(); track item.id) {
+              <tr>
+                <td>
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(item.student)"
+                    (change)="toggleStudent(item.student, $any($event.target).checked)"
+                  />
+                </td>
+                <td>
+                  <strong>{{ item.student_name }}</strong>
+                  <div class="muted">{{ item.student_email }}</div>
+                </td>
+                <td>
+                  <div class="progress">
+                    <span>{{ item.progress_percent }}%</span>
+                    <div class="bar" role="progressbar" [attr.aria-valuenow]="item.progress_percent" aria-valuemin="0" aria-valuemax="100">
+                      <i [style.width.%]="item.progress_percent"></i>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  @if (item.quiz_attempts.length === 0) {
+                    —
+                  } @else {
+                    @for (attempt of item.quiz_attempts; track attempt.id) {
+                      <div>
+                        {{ attempt.score }}%
+                        @if (attempt.passed) {
+                          ✓
+                        }
+                      </div>
+                    }
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="email" aria-labelledby="email-title">
+        <h2 id="email-title">{{ 'teacher.email.title' | translate }}</h2>
+
+        @if (sentCount() !== null) {
+          <p class="ok" role="status">{{ sentLabel() }}</p>
+        }
+        @if (emailError() === 'none') {
+          <p class="alert" role="alert">{{ 'teacher.email.none' | translate }}</p>
+        }
+        @if (emailError() === 'error') {
+          <p class="alert" role="alert">{{ 'teacher.email.error' | translate }}</p>
+        }
+
+        <form [formGroup]="emailForm" (ngSubmit)="sendEmail()">
+          <label>
+            <span>{{ 'teacher.email.subject' | translate }}</span>
+            <input formControlName="subject" />
+          </label>
+          <label>
+            <span>{{ 'teacher.email.message' | translate }}</span>
+            <textarea rows="5" formControlName="message"></textarea>
+          </label>
+          <label class="check">
+            <input type="checkbox" formControlName="include_progress" />
+            <span>{{ 'teacher.email.includeProgress' | translate }}</span>
+          </label>
+          <button class="btn btn--primary" type="submit" [disabled]="sending()">
+            {{ 'teacher.email.send' | translate }}
+          </button>
+        </form>
+      </section>
+    </div>
+  }
+</section>

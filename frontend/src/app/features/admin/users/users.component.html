@@ -1,0 +1,133 @@
+<section class="admin-users" aria-labelledby="users-title">
+  <header class="admin-users__header">
+    <div>
+      <h1 id="users-title">{{ 'admin.users.title' | translate }}</h1>
+      <a routerLink="/admin">{{ 'admin.back' | translate }}</a>
+    </div>
+    <nav class="admin__nav" aria-label="Admin">
+      <a routerLink="/admin">{{ 'admin.nav.kpis' | translate }}</a>
+      <a routerLink="/admin/users" class="is-active">{{ 'admin.nav.users' | translate }}</a>
+      <a routerLink="/admin/moderation">{{ 'admin.nav.moderation' | translate }}</a>
+      <a routerLink="/admin/transactions">{{ 'admin.nav.transactions' | translate }}</a>
+    </nav>
+  </header>
+
+  @if (message() === 'saved') {
+    <p class="ok" role="status">{{ 'admin.users.saved' | translate }}</p>
+  }
+  @if (message() === 'error') {
+    <p class="alert" role="alert">{{ 'admin.users.error' | translate }}</p>
+  }
+  @if (message() === 'deleteError') {
+    <p class="alert" role="alert">{{ 'admin.users.errorDelete' | translate }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="user-form">
+    <h2>
+      @if (editingId() === null) {
+        {{ 'admin.users.create' | translate }}
+      } @else {
+        {{ 'admin.users.edit' | translate }}
+      }
+    </h2>
+    <div class="grid">
+      <label>
+        {{ 'admin.users.email' | translate }}
+        <input type="email" formControlName="email" autocomplete="email" />
+      </label>
+      <label>
+        {{ 'admin.users.password' | translate }}
+        <input type="password" formControlName="password" autocomplete="new-password" />
+      </label>
+      <label>
+        {{ 'admin.users.username' | translate }}
+        <input type="text" formControlName="username" />
+      </label>
+      <label>
+        {{ 'admin.users.role' | translate }}
+        <select formControlName="role">
+          @for (role of roles; track role) {
+            <option [value]="role">{{ roleLabel(role) }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        {{ 'admin.users.firstName' | translate }}
+        <input type="text" formControlName="first_name" />
+      </label>
+      <label>
+        {{ 'admin.users.lastName' | translate }}
+        <input type="text" formControlName="last_name" />
+      </label>
+      <label>
+        {{ 'admin.users.credits' | translate }}
+        <input type="number" formControlName="credit_balance" min="0" />
+      </label>
+      <label class="check">
+        <input type="checkbox" formControlName="is_active" />
+        {{ 'admin.users.active' | translate }}
+      </label>
+      <label class="check">
+        <input type="checkbox" formControlName="is_staff" />
+        {{ 'admin.users.staff' | translate }}
+      </label>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">
+        {{ 'admin.users.save' | translate }}
+      </button>
+      @if (editingId() !== null) {
+        <button type="button" class="btn" (click)="cancelEdit()">
+          {{ 'admin.users.cancel' | translate }}
+        </button>
+      }
+    </div>
+  </form>
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else if (error()) {
+    <p class="alert" role="alert">{{ 'admin.error.load' | translate }}</p>
+  } @else if (users().length === 0) {
+    <p>{{ 'admin.users.empty' | translate }}</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'admin.users.email' | translate }}</th>
+            <th>{{ 'admin.users.name' | translate }}</th>
+            <th>{{ 'admin.users.role' | translate }}</th>
+            <th>{{ 'admin.users.credits' | translate }}</th>
+            <th>{{ 'admin.users.active' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>{{ user.email }}</td>
+              <td>{{ displayName(user) }}</td>
+              <td>{{ roleLabel(user.role) }}</td>
+              <td>{{ user.credit_balance }}</td>
+              <td>{{ user.is_active ? '✓' : '—' }}</td>
+              <td class="row-actions">
+                <button type="button" class="btn" (click)="startEdit(user)">
+                  {{ 'admin.users.edit' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn--ghost"
+                  [disabled]="deletingId() === user.id"
+                  (click)="remove(user)"
+                >
+                  {{ 'admin.users.delete' | translate }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

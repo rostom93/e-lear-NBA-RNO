@@ -1,0 +1,57 @@
+<section class="dash" aria-labelledby="teacher-dash-title">
+  <header class="dash__header">
+    <div>
+      <h1 id="teacher-dash-title">{{ 'dashboard.teacher.title' | translate }}</h1>
+      <p>{{ 'dashboard.teacher.body' | translate }}</p>
+    </div>
+    <a class="btn btn--primary" routerLink="/teacher/courses/new">{{ 'teacher.create' | translate }}</a>
+  </header>
+
+  @if (error()) {
+    <p class="alert" role="alert">{{ 'courses.error.load' | translate }}</p>
+  }
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else if (courses().length === 0) {
+    <p>{{ 'dashboard.teacher.empty' | translate }}</p>
+  } @else {
+    <ul class="list">
+      @for (course of courses(); track course.id) {
+        <li>
+          <article>
+            <div>
+              <h2>{{ course.title }}</h2>
+              <p>
+                {{ course.price_credits }} {{ 'nav.credits' | translate }} ·
+                {{ course.modules_count }} {{ 'courses.modules' | translate }}
+                @if (!course.is_active) {
+                  <span class="badge">OFF</span>
+                }
+              </p>
+            </div>
+            <div class="actions">
+              <a class="btn btn--ghost" [routerLink]="['/teacher/courses', course.id, 'preview']">
+                {{ 'teacher.preview' | translate }}
+              </a>
+              <a class="btn btn--ghost" [routerLink]="['/teacher/courses', course.id, 'edit']">
+                {{ 'teacher.edit' | translate }}
+              </a>
+              <a class="btn btn--ghost" [routerLink]="['/teacher/courses', course.id, 'students']">
+                {{ 'teacher.students' | translate }}
+              </a>
+              <button
+                type="button"
+                class="btn btn--ghost"
+                [disabled]="deletingId() === course.id"
+                (click)="remove(course)"
+              >
+                {{ 'teacher.delete' | translate }}
+              </button>
+            </div>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+</section>

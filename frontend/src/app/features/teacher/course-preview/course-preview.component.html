@@ -1,0 +1,138 @@
+@if (loading()) {
+  <p>{{ 'courses.loading' | translate }}</p>
+} @else if (error() || !course()) {
+  <p class="alert" role="alert">{{ 'courses.error.load' | translate }}</p>
+} @else {
+  <section class="preview" aria-labelledby="preview-title">
+    <p class="preview__banner" role="status">{{ 'teacher.preview.banner' | translate }}</p>
+
+    <header class="preview__header">
+      <div>
+        <p class="eyebrow">{{ 'teacher.preview.title' | translate }}</p>
+        <h1 id="preview-title">
+          {{ course()!.title }}
+          @if (!course()!.is_active) {
+            <span class="badge">{{ 'admin.moderation.inactive' | translate }}</span>
+          }
+        </h1>
+        <p class="preview__meta">
+          {{ course()!.price_credits }} {{ 'nav.credits' | translate }} ·
+          {{ course()!.category }} · {{ course()!.level }}
+        </p>
+      </div>
+      <div class="preview__actions">
+        <a class="btn btn--ghost" [routerLink]="['/teacher/courses', course()!.id, 'edit']">
+          {{ 'teacher.edit' | translate }}
+        </a>
+        <a class="btn btn--ghost" routerLink="/teacher">{{ 'teacher.preview.back' | translate }}</a>
+      </div>
+    </header>
+
+    <p class="preview__description">{{ course()!.description }}</p>
+
+    @if (course()!.tags.length > 0) {
+      <ul class="tags">
+        @for (tag of course()!.tags; track tag.id) {
+          <li>{{ tag.name }}</li>
+        }
+      </ul>
+    }
+
+    @if (modules().length === 0) {
+      <p>{{ 'teacher.preview.empty' | translate }}</p>
+    } @else {
+      <div class="preview__layout">
+        <aside class="toc" [attr.aria-label]="'courses.modules' | translate">
+          <h2>{{ 'courses.modules' | translate }}</h2>
+          <ol>
+            @for (module of modules(); track module.id) {
+              <li>
+                <button
+                  type="button"
+                  [class.active]="module.id === activeModuleId()"
+                  [attr.aria-current]="module.id === activeModuleId()"
+                  (click)="selectModule(module)"
+                >
+                  <span>{{ module.order }}. {{ module.title }}</span>
+                  <small>{{ module.module_type }}</small>
+                </button>
+              </li>
+            }
+          </ol>
+        </aside>
+
+        <div class="content">
+          @if (activeModule(); as module) {
+            <h2>{{ module.title }}</h2>
+
+            @switch (module.module_type) {
+              @case ('PDF') {
+                @if (module.pdf_url) {
+                  <p>{{ 'courses.pdf.hint' | translate }}</p>
+                  <a class="btn btn--primary" [href]="module.pdf_url" target="_blank" rel="noopener">
+                    {{ 'courses.pdf.open' | translate }}
+                  </a>
+                } @else {
+                  <p class="hint">{{ 'teacher.preview.noPdf' | translate }}</p>
+                }
+              }
+              @case ('VIDEO') {
+                @if (embedUrl(); as url) {
+                  <div class="video">
+                    <iframe
+                      [src]="url"
+                      [title]="module.title"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                      loading="lazy"
+                    ></iframe>
+                  </div>
+                } @else if (module.video_url) {
+                  <a [href]="module.video_url" target="_blank" rel="noopener">
+                    {{ module.video_url }}
+                  </a>
+                } @else {
+                  <p class="hint">{{ 'teacher.preview.noVideo' | translate }}</p>
+                }
+
+                @if (module.captions_url) {
+                  <p>
+                    <a [href]="module.captions_url" target="_blank" rel="noopener">
+                      {{ 'courses.captions' | translate }}
+                    </a>
+                  </p>
+                }
+
+                @if (module.transcript) {
+                  <details>
+                    <summary>{{ 'courses.transcript' | translate }}</summary>
+                    <p>{{ module.transcript }}</p>
+                  </details>
+                }
+              }
+              @case ('QUIZ') {
+                @if (module.quiz; as quiz) {
+                  <p class="hint">{{ 'teacher.preview.quizReadonly' | translate }}</p>
+                  <h3>{{ quiz.title }}</h3>
+                  @for (question of quiz.questions; track question.id) {
+                    <fieldset disabled>
+                      <legend>{{ question.order }}. {{ question.text }}</legend>
+                      @for (choice of question.choices; track choice.id) {
+                        <label class="choice">
+                          <input type="radio" [name]="'preview-q' + question.id" disabled />
+                          <span>{{ choice.text }}</span>
+                        </label>
+                      }
+                    </fieldset>
+                  }
+                } @else {
+                  <p class="hint">{{ 'teacher.preview.noQuiz' | translate }}</p>
+                }
+              }
+            }
+          }
+        </div>
+      </div>
+    }
+  </section>
+}

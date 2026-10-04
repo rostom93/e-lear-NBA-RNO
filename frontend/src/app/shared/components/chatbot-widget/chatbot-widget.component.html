@@ -1,0 +1,82 @@
+<div class="chatbot" (keydown)="onKeydown($event)">
+  <button
+    #toggleBtn
+    type="button"
+    class="chatbot__toggle"
+    [attr.aria-expanded]="chat.open()"
+    aria-controls="chatbot-panel"
+    (click)="toggle()"
+  >
+    {{ (chat.open() ? 'chat.close' : 'chat.open') | translate }}
+  </button>
+
+  @if (chat.open()) {
+    <section
+      #panel
+      id="chatbot-panel"
+      class="chatbot__panel"
+      role="dialog"
+      aria-modal="false"
+      [attr.aria-label]="'chat.title' | translate"
+    >
+      <header class="chatbot__header">
+        <div>
+          <h2 id="chatbot-title">{{ 'chat.title' | translate }}</h2>
+          <p>{{ 'chat.subtitle' | translate }}</p>
+        </div>
+        <button type="button" class="btn btn--ghost" (click)="close()">
+          {{ 'chat.close' | translate }}
+        </button>
+      </header>
+
+      <div
+        #thread
+        class="chatbot__thread"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
+        [attr.aria-label]="'chat.thread' | translate"
+      >
+        @if (chat.messages().length === 0) {
+          <p class="chatbot__hint">{{ 'chat.hint' | translate }}</p>
+        }
+        @for (msg of chat.messages(); track msg.id) {
+          <div
+            class="bubble"
+            [class.bubble--user]="msg.sender === 'user'"
+            [class.bubble--bot]="msg.sender === 'bot'"
+          >
+            <span class="bubble__role">
+              {{ (msg.sender === 'user' ? 'chat.you' : 'chat.bot') | translate }}
+            </span>
+            <p>{{ displayContent(msg.content) }}</p>
+          </div>
+        }
+        @if (chat.sending()) {
+          <p class="chatbot__typing" aria-live="polite">{{ 'chat.typing' | translate }}</p>
+        }
+      </div>
+
+      @if (localError()) {
+        <p class="chatbot__error" role="alert">{{ 'chat.error' | translate }}</p>
+      }
+
+      <form class="chatbot__form" (ngSubmit)="send()">
+        <label class="sr-only" for="chatbot-input">{{ 'chat.input' | translate }}</label>
+        <textarea
+          #inputEl
+          id="chatbot-input"
+          name="chatbotMessage"
+          rows="2"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)"
+          [placeholder]="'chat.placeholder' | translate"
+          [disabled]="chat.sending()"
+        ></textarea>
+        <button type="submit" class="btn btn--primary" [disabled]="chat.sending() || !draft().trim()">
+          {{ 'chat.send' | translate }}
+        </button>
+      </form>
+    </section>
+  }
+</div>

@@ -1,0 +1,57 @@
+<section class="moderation" aria-labelledby="mod-title">
+  <header class="moderation__header">
+    <div>
+      <h1 id="mod-title">{{ 'admin.moderation.title' | translate }}</h1>
+      <a routerLink="/admin">{{ 'admin.back' | translate }}</a>
+    </div>
+    <nav class="admin__nav" aria-label="Admin">
+      <a routerLink="/admin">{{ 'admin.nav.kpis' | translate }}</a>
+      <a routerLink="/admin/users">{{ 'admin.nav.users' | translate }}</a>
+      <a routerLink="/admin/moderation" class="is-active">{{ 'admin.nav.moderation' | translate }}</a>
+      <a routerLink="/admin/transactions">{{ 'admin.nav.transactions' | translate }}</a>
+    </nav>
+  </header>
+
+  @if (toggleError()) {
+    <p class="alert" role="alert">{{ 'admin.moderation.error' | translate }}</p>
+  }
+
+  @if (loading()) {
+    <p>{{ 'courses.loading' | translate }}</p>
+  } @else if (error()) {
+    <p class="alert" role="alert">{{ 'admin.error.load' | translate }}</p>
+  } @else if (courses().length === 0) {
+    <p>{{ 'admin.moderation.empty' | translate }}</p>
+  } @else {
+    <ul class="list">
+      @for (course of courses(); track course.id) {
+        <li>
+          <article>
+            <div>
+              <h2>
+                {{ course.title }}
+                @if (!course.is_active) {
+                  <span class="badge">{{ 'admin.moderation.inactive' | translate }}</span>
+                } @else {
+                  <span class="badge badge--ok">{{ 'admin.moderation.active' | translate }}</span>
+                }
+              </h2>
+              <p>
+                {{ 'admin.moderation.teacher' | translate }}: {{ course.teacher_email }} ·
+                {{ course.price_credits }} {{ 'nav.credits' | translate }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="btn"
+              [disabled]="togglingId() === course.id"
+              (click)="toggle(course)"
+            >
+              {{ 'admin.moderation.toggle' | translate }}
+            </button>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+</section>
